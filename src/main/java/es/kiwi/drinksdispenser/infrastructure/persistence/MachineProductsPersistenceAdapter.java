@@ -1,0 +1,50 @@
+package es.kiwi.drinksdispenser.infrastructure.persistence;
+
+import es.kiwi.drinksdispenser.domain.model.MachineProducts;
+import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
+import es.kiwi.drinksdispenser.infrastructure.persistence.dao.MachineProductsDAO;
+import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineProductsDAOMapper;
+import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachineProductsDAORepository;
+import es.kiwi.drinksdispenser.infrastructure.persistence.repository.ProductsDAORepository;
+import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RequiredArgsConstructor
+public class MachineProductsPersistenceAdapter implements MachineProductsOutput {
+    private final MachineProductsDAORepository machineProductsDAORepository;
+    private final MachineProductsDAOMapper machineProductsDAOMapper;
+    private final ProductsDAORepository productsDAORepository;
+
+
+    @Override
+    public Mono<Void> save(List<MachineProducts> machineProductsList) {
+        return Flux.fromIterable(machineProductsList).flatMap(this::processMachineProduct).then();
+    }
+
+    private Mono<MachineProductsDAO> processMachineProduct(MachineProducts machineProducts) {
+        return productsDAORepository.findByName(machineProducts.getProduct().getProductsOption().getName())
+                .flatMap(product -> machineProductsDAORepository.findByMachineIdAndProductIdAndExpirationDate(
+                                machineProducts.getMachine().getId(), product.getId(), machineProducts.getExpirationDate())
+                        .flatMap(existingProduct -> updateStock(existingProduct, machineProducts))
+                        .switchIfEmpty(insertNewProduct(machineProducts, product.getId())));
+    }
+
+    private Mono<MachineProductsDAO> insertNewProduct(MachineProducts machineProducts, Long productId) {
+        MachineProductsDAO machineProductsDAO = machineProductsDAOMapper.toMachineProductsDAO(machineProducts);
+        machineProductsDAO.setProductId(productId);
+        machineProductsDAO.setUpdatedAt(LocalDateTime.now());
+        machineProductsDAO.setOperator("USER002");
+        return machineProductsDAORepository.save(machineProductsDAO);
+    }
+
+    private Mono<MachineProductsDAO> updateStock(MachineProductsDAO existingProduct, MachineProducts machineProducts) {
+        existingProduct.setStock(existingProduct.getStock() + machineProducts.getStock());
+        existingProduct.setUpdatedAt(LocalDateTime.now());
+        existingProduct.setOperator("USER002");
+        return machineProductsDAORepository.save(existingProduct);
+    }
+}
