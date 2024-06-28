@@ -1,0 +1,24 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /api/v1
+spring:
+  application:
+    name: drinks-dispenser-backend
+  sql:
+    init:
+      data-locations: classpath:db/data/data.sql
+      schema-locations: classpath:db/schema/schema.sql
+      mode: always
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    generate-ddl: false
+    open-in-view: false
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /api
