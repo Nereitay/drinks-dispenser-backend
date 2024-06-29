@@ -5,11 +5,9 @@ import es.kiwi.drinksdispenser.domain.output.MachinesOutput;
 import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachinesDAORepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
-@Component
 public class MachinesPersistenceAdapter implements MachinesOutput {
     private final MachinesDAORepository machinesDAORepository;
     private final MachineDAOMapper machineDAOMapper;

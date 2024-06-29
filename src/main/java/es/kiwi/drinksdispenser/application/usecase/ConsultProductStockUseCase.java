@@ -3,7 +3,6 @@ package es.kiwi.drinksdispenser.application.usecase;
 import es.kiwi.drinksdispenser.application.service.ProductStockService;
 import es.kiwi.drinksdispenser.application.vo.ProductStockVO;
 import es.kiwi.drinksdispenser.domain.model.ProductsOption;
-import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;

@@ -31,7 +31,9 @@ public class MachineProductsRestAdapter {
         return addProductsToMachineUseCase.addProduct(machineProductsDTOList);
     }
 
+    @Tag(name = "/machine-products")
     @GetMapping("/stock/{machineId}")
+    @Operation(summary = "This method is used to consult a product stock.")
     public Mono<ProductStockVO> consultProductStock(@PathVariable Long machineId,
                                                     @RequestParam ProductsOption productsOption) {
         return consultProductStockUseCase.consultProductStock(machineId, productsOption);

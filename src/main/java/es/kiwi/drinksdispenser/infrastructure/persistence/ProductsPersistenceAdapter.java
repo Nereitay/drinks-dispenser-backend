@@ -5,9 +5,8 @@ import es.kiwi.drinksdispenser.domain.output.ProductsOutput;
 import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.ProductsDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.ProductsDAORepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-@Component
+
 @RequiredArgsConstructor
 public class ProductsPersistenceAdapter implements ProductsOutput {
 

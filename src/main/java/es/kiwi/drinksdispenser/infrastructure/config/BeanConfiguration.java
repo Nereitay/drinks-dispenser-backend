@@ -3,9 +3,12 @@ package es.kiwi.drinksdispenser.infrastructure.config;
 import es.kiwi.drinksdispenser.application.service.AddProductsService;
 import es.kiwi.drinksdispenser.application.service.ProductStockService;
 import es.kiwi.drinksdispenser.application.usecase.AddProductsToMachineUseCase;
+import es.kiwi.drinksdispenser.application.usecase.ConsultMachineStatusUseCase;
 import es.kiwi.drinksdispenser.infrastructure.persistence.MachineProductsPersistenceAdapter;
 import es.kiwi.drinksdispenser.infrastructure.persistence.ProductsPersistenceAdapter;
+import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineProductsDAOMapper;
+import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.ProductsDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachineProductsDAORepository;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachinesDAORepository;
 import es.kiwi.drinksdispenser.infrastructure.persistence.MachinesPersistenceAdapter;
@@ -36,4 +39,17 @@ public class BeanConfiguration {
     public ProductStockService productStockService(MachineProductsPersistenceAdapter machineProductsPersistenceAdapter) {
         return new ProductStockService(machineProductsPersistenceAdapter);
     }
+
+    @Bean
+    public MachinesPersistenceAdapter machinesPersistenceAdapter(MachinesDAORepository machinesDAORepository,
+                                                                 MachineDAOMapper machineDAOMapper) {
+        return new MachinesPersistenceAdapter(machinesDAORepository, machineDAOMapper);
+    }
+
+    @Bean
+    public ProductsPersistenceAdapter productsPersistenceAdapter(ProductsDAORepository productsDAORepository,
+                                                                 ProductsDAOMapper productsDAOMapper) {
+        return new ProductsPersistenceAdapter(productsDAORepository, productsDAOMapper);
+    }
+
 }
