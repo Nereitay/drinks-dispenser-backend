@@ -8,14 +8,17 @@ import es.kiwi.drinksdispenser.domain.model.ProductsOption;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/v1/machine-products")
 @RequiredArgsConstructor
+@Validated
 public class MachineProductsRestAdapter {
 
     private final AddProductsToMachineUseCase addProductsToMachineUseCase;
@@ -24,7 +27,7 @@ public class MachineProductsRestAdapter {
     @PostMapping
     @Tag(name = "/machine-products")
     @Operation(summary = "This method is used to add more products to the dispenser.")
-    public Mono<Void> addProductToMachine(@RequestBody List<MachineProductsDTO> machineProductsDTOList) {
+    public Mono<Void> addProductToMachine(@Valid @RequestBody List<MachineProductsDTO> machineProductsDTOList) {
         return addProductsToMachineUseCase.addProduct(machineProductsDTOList);
     }
 
