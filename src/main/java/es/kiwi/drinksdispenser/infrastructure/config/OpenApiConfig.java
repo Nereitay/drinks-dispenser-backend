@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public GroupedOpenApi publicApi() {
+    public GroupedOpenApi v1Api() {
         return GroupedOpenApi.builder()
-                .group("public")
-                .pathsToMatch("/**")
+                .group("V1")
+                .pathsToMatch("/v1/**")
                 .build();
     }
 

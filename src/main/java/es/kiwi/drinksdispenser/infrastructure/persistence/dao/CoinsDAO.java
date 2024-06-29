@@ -1,6 +1,8 @@
 package es.kiwi.drinksdispenser.infrastructure.persistence.dao;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -9,6 +11,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Table(name = "coins")
+@NoArgsConstructor
+@AllArgsConstructor
 public class CoinsDAO implements Serializable {
 
     private static final long serialVersionUID = 1L;

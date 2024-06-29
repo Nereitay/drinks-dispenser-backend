@@ -1,7 +1,5 @@
 server:
   port: 8088
-  servlet:
-    context-path: /api/v1
 spring:
   application:
     name: drinks-dispenser-backend
@@ -21,4 +19,4 @@ springdoc:
   api-docs:
     enabled: true
   swagger-ui:
-    path: /api
+    path: /api-ui
