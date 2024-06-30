@@ -1,4 +1,4 @@
-package es.kiwi.drinksdispenser.application.command;
+package es.kiwi.drinksdispenser.application.dto;
 
 import es.kiwi.drinksdispenser.domain.model.CoinType;
 import es.kiwi.drinksdispenser.domain.model.ProductsOption;
@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DispenseDrinkCommand {
+public class DispenseDrinkDTO {
     private Long machineId;
     private ProductsOption productsOption;
     private List<CoinType> coinTypeList;

@@ -1,5 +1,6 @@
 package es.kiwi.drinksdispenser.infrastructure.config;
 
+import es.kiwi.drinksdispenser.application.mapper.CoinsVOMapper;
 import es.kiwi.drinksdispenser.application.service.AddProductsService;
 import es.kiwi.drinksdispenser.application.service.DispenseDrinkService;
 import es.kiwi.drinksdispenser.application.service.ProductStockService;
@@ -36,9 +37,10 @@ public class BeanConfiguration {
     public MachineProductsPersistenceAdapter machineProductsPersistenceAdapter(MachineProductsDAORepository machineProductsDAORepository,
                                                                                MachineProductsDAOMapper machineProductsDAOMapper,
                                                                                ProductsDAORepository productsDAORepository,
-                                                                               MachinesDAORepository machinesDAORepository) {
+                                                                               MachinesDAORepository machinesDAORepository,
+                                                                               ProductsDAOMapper productsDAOMapper) {
         return new MachineProductsPersistenceAdapter(machineProductsDAORepository, machineProductsDAOMapper,
-                productsDAORepository, machinesDAORepository);
+                productsDAORepository, machinesDAORepository, productsDAOMapper);
     }
 
     @Bean
@@ -63,9 +65,10 @@ public class BeanConfiguration {
                                                      LcdNotifier lcdNotifier,
                                                      CoinsValidationService coinsValidationService,
                                                      MachineProductsOutput machineProductsOutput,
-                                                     ProductStockZeroEventHandler productStockZeroEventHandler) {
+                                                     ProductStockZeroEventHandler productStockZeroEventHandler,
+                                                     CoinsVOMapper coinsVOMapper) {
         return new DispenseDrinkService(coinsPersistenceAdapter, lcdNotifier, coinsValidationService,
-                machineProductsOutput, productStockZeroEventHandler);
+                machineProductsOutput, productStockZeroEventHandler, coinsVOMapper);
     }
 
     @Bean

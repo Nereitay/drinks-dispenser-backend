@@ -12,5 +12,7 @@ public interface MachineProductsDAOMapper {
     @Mapping(target = "productId", source = "product.id")
     MachineProductsDAO toMachineProductsDAO(MachineProducts machineProducts);
 
+    @Mapping(target = "machine.id", source = "machineId")
+    @Mapping(target = "product.id", source = "productId")
     MachineProducts toMachineProducts(MachineProductsDAO machineProductsDAO);
 }

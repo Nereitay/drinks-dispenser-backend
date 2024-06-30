@@ -6,6 +6,7 @@ import es.kiwi.drinksdispenser.domain.model.MachineProducts;
 import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
 import es.kiwi.drinksdispenser.infrastructure.persistence.dao.MachineProductsDAO;
 import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineProductsDAOMapper;
+import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.ProductsDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachineProductsDAORepository;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachinesDAORepository;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.ProductsDAORepository;
@@ -24,6 +25,7 @@ public class MachineProductsPersistenceAdapter implements MachineProductsOutput 
     private final MachineProductsDAOMapper machineProductsDAOMapper;
     private final ProductsDAORepository productsDAORepository;
     private final MachinesDAORepository machinesDAORepository;
+    private final ProductsDAOMapper productsDAOMapper;
 
 
     @Override
@@ -40,14 +42,18 @@ public class MachineProductsPersistenceAdapter implements MachineProductsOutput 
                 .switchIfEmpty(Mono.error(new ProductNotFoundException("Product with name '" + productName + "' not " +
                         "found.")))
                 .flatMapMany(productsDAO -> machineProductsDAORepository.findByMachineIdAndProductId(machineId,
-                        productsDAO.getId()))
-                .flatMap(machineProductsDAO -> Mono.just(machineProductsDAOMapper.toMachineProducts(machineProductsDAO)));
+                                productsDAO.getId())
+                        .flatMap(machineProductsDAO -> {
+                            MachineProducts machineProducts = machineProductsDAOMapper.toMachineProducts(machineProductsDAO);
+                            machineProducts.setProduct(productsDAOMapper.productsDAOToProducts(productsDAO));
+                            return Mono.just(machineProducts);
+                        }));
     }
 
     @Override
     public Mono<MachineProducts> findAvailableProduct(Long machineId, String productName) {
         return findByMachineIdAndProduct(machineId, productName)
-                .filter(machineProducts -> machineProducts.getExpirationDate().isAfter(LocalDate.now()))
+                .filter(machineProducts -> machineProducts.getExpirationDate().isAfter(LocalDate.now()) && machineProducts.getStock() > 0)
                 .sort(Comparator.comparing(MachineProducts::getExpirationDate))
                 .next();
     }

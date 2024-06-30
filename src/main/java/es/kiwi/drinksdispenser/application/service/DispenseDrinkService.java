@@ -1,6 +1,7 @@
 package es.kiwi.drinksdispenser.application.service;
 
-import es.kiwi.drinksdispenser.application.command.DispenseDrinkCommand;
+import es.kiwi.drinksdispenser.application.dto.DispenseDrinkDTO;
+import es.kiwi.drinksdispenser.application.mapper.CoinsVOMapper;
 import es.kiwi.drinksdispenser.application.vo.DispenseDrinkVO;
 import es.kiwi.drinksdispenser.domain.model.Coins;
 import es.kiwi.drinksdispenser.domain.model.MachineProducts;
@@ -14,6 +15,7 @@ import io.netty.handler.timeout.TimeoutException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +28,9 @@ public class DispenseDrinkService {
     private final CoinsValidationService coinsValidationService;
     private final MachineProductsOutput machineProductsOutput;
     private final ProductStockZeroEventHandler productStockZeroEventHandler;
+    private final CoinsVOMapper coinsVOMapper;
 
-    public Mono<DispenseDrinkVO> dispenseDrink(DispenseDrinkCommand command) {
+    public Mono<DispenseDrinkVO> dispenseDrink(DispenseDrinkDTO command) {
 
         List<Coins> coinsList = command.getCoinTypeList().stream().collect(Collectors.groupingBy(coinType -> coinType,
                 Collectors.counting())).entrySet().stream().map(entry -> {
@@ -53,7 +56,7 @@ public class DispenseDrinkService {
         return coinsOutput.insertCoins(coinsList);
     }
 
-    private Mono<DispenseDrinkVO> isConfirmedByUser(DispenseDrinkCommand command, List<Coins> coinsList) {
+    private Mono<DispenseDrinkVO> isConfirmedByUser(DispenseDrinkDTO command, List<Coins> coinsList) {
         if (!command.isConfirmed()) {
             return handleReturnCoins(
                     coinsList, new RuntimeException("Operation rejected by user"));
@@ -68,27 +71,28 @@ public class DispenseDrinkService {
         } else {
             lcdNotifier.notify("Operation failed: " + e.getMessage());
         }
-        double total = coinsValidationService.calculateTotal(coins);
+        BigDecimal total = coinsValidationService.calculateTotal(coins);
         return coinsOutput.reduceCoins(coins)
                 .then(Mono.just(new DispenseDrinkVO(e != null ?
-                        e.getMessage() : "", coins,
+                        e.getMessage().concat(", Operation Cancelled with return coins.") : "",
+                        coinsVOMapper.toCoinsVOList(coins),
                         total, null)));
     }
 
-    private Mono<MachineProducts> checkProductAvailability(DispenseDrinkCommand command) {
+    private Mono<MachineProducts> checkProductAvailability(DispenseDrinkDTO command) {
         lcdNotifier.notify("CHECK_PRODUCT_AVAILABILITY");
         return machineProductsOutput.findAvailableProduct(command.getMachineId(), command.getProductsOption().getName())
                 .switchIfEmpty(Mono.error(new RuntimeException("Product not available or expired")));
     }
 
-    private Mono<MachineProducts> validateMoney(DispenseDrinkCommand command, List<Coins> coins,
+    private Mono<MachineProducts> validateMoney(DispenseDrinkDTO command, List<Coins> coins,
                                                 MachineProducts machineProducts) {
         lcdNotifier.notify("VALIDATE_MONEY");
         return Mono.just(machineProducts)
                 .flatMap(product -> {
-                    double totalMoney = coinsValidationService.calculateTotal(coins);
-                    Double price = product.getProduct().getPrice();
-                    double change = totalMoney - price;
+                    BigDecimal totalMoney = coinsValidationService.calculateTotal(coins);
+                    BigDecimal price = product.getProduct().getPrice();
+                    BigDecimal change = totalMoney.subtract(price);
                     return coinsValidationService.isSufficientAmount(totalMoney, price)
                             .flatMap(isSufficient -> {
                                 if (!isSufficient) {
@@ -104,7 +108,8 @@ public class DispenseDrinkService {
                                             return coinsValidationService.canProvideChange(command.getMachineId(), change)
                                                     .flatMap(canProvideChange -> {
                                                         if (!canProvideChange) {
-                                                            return Mono.error(new RuntimeException("Can't provide change"));
+                                                            return Mono.error(new RuntimeException("Can't provide " +
+                                                                    "changes"));
                                                         }
 
                                                         return Mono.just(machineProducts);
@@ -114,20 +119,22 @@ public class DispenseDrinkService {
                 });
     }
 
-    private Mono<DispenseDrinkVO> dispenseProduct(DispenseDrinkCommand command, List<Coins> coins, MachineProducts machineProducts) {
+    private Mono<DispenseDrinkVO> dispenseProduct(DispenseDrinkDTO command, List<Coins> coins, MachineProducts machineProducts) {
         lcdNotifier.notify("DISPENSE_PRODUCT");
-        double totalCoinsValue = coinsValidationService.calculateTotal(coins);
-        double productPrice = machineProducts.getProduct().getPrice();
-        double changeAmount = totalCoinsValue - productPrice;
+        BigDecimal totalCoinsValue = coinsValidationService.calculateTotal(coins);
+        BigDecimal productPrice = machineProducts.getProduct().getPrice();
+        BigDecimal changeAmount = totalCoinsValue.subtract(productPrice);
 
         return machineProductsOutput.reduceProduct(machineProducts)
                 .then(Mono.defer(() -> coinsValidationService.reduceChange(command.getMachineId(), changeAmount)))
                 .flatMap(changeCoins -> {
-                    double changeGiven = coinsValidationService.calculateTotal(changeCoins);
+                    BigDecimal changeGiven = coinsValidationService.calculateTotal(changeCoins);
                     return machineProductsOutput.findAvailableProduct(command.getMachineId(),
                                     machineProducts.getProduct().getProductsOption().getName())
                             .switchIfEmpty(notifyOutOfStock(machineProducts))
-                            .then(Mono.just(new DispenseDrinkVO("SUCCEED - Product dispensed with change", changeCoins, changeGiven,
+                            .then(Mono.just(new DispenseDrinkVO("SUCCEED - Product dispensed with changes",
+                                    coinsVOMapper.toCoinsVOList(changeCoins),
+                                    changeGiven,
                                     machineProducts.getProduct().getProductsOption())));
                 })
                 .onErrorResume(throwable -> handleReturnCoins(coins, throwable));

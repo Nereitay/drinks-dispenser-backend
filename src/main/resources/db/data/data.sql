@@ -1,13 +1,13 @@
 insert into machines (id, name, location, status, operator)
 values (1, 'Drink Dispenser 001', 'Plant 1', 0, 'Kiwi'),
        (2, 'Drink Dispenser 002', 'Plant 1', 1, 'Kiwi');
-insert into coins (id, machine_id, denomination, quantity)
-values (null, 1, 0.05, 100),
-       (null, 1, 0.10, 50),
-       (null, 1, 0.20, 30),
-       (null, 1, 0.50, 20),
-       (null, 1, 1.00, 10),
-       (null, 1, 2.00, 1);
+insert into coins (id, machine_id, denomination, value, quantity)
+values (null, 1,'FIVE_CENTS', 0.05, 100),
+       (null, 1,'TEN_CENTS', 0.10, 50),
+       (null, 1,'TWENTY_CENTS', 0.20, 30),
+       (null, 1,'FIFTY_CENTS', 0.50, 20),
+       (null, 1,'ONE_EURO', 1.00, 10),
+       (null, 1,'TWO_EURO', 2.00, 1);
 insert into products (id, name, price)
 values (1, 'Coke', 2),
        (2, 'Redbull', 2.25),

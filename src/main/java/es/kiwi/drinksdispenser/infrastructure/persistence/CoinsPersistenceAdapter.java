@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,16 +36,17 @@ public class CoinsPersistenceAdapter implements CoinsOutput {
     }
 
     @Override
-    public Mono<Double> consultTotalMoneyInMachine(Long machineId) {
-        return coinsDAORepository.findByMachineId(machineId).reduce(0.0,
-                (aDouble, coinsDAO) -> aDouble + coinsDAO.getDenomination() * coinsDAO.getQuantity() / 100);
+    public Mono<BigDecimal> consultTotalMoneyInMachine(Long machineId) {
+        return coinsDAORepository.findByMachineId(machineId).reduce(BigDecimal.ZERO,
+                (aDouble, coinsDAO) -> aDouble.add(coinsDAO.getValue().multiply(BigDecimal.valueOf(coinsDAO.getQuantity()))));
     }
 
     @Override
     public Mono<Void> reduceCoins(List<Coins> coins) {
         return Flux.fromIterable(coins)
                 .map(coinsDAOMapper::toCoinsDAO)
-                .flatMap(coinsDAO -> coinsDAORepository.findByMachineIdAndDenomination(coinsDAO.getMachineId(), coinsDAO.getDenomination())
+                .flatMap(coinsDAO -> coinsDAORepository.findByMachineIdAndDenomination(coinsDAO.getMachineId(),
+                                coinsDAO.getDenomination())
                         .flatMap(existing -> reduceQuantity(existing, coinsDAO)).switchIfEmpty(insertNew(coinsDAO))).then();
     }
 

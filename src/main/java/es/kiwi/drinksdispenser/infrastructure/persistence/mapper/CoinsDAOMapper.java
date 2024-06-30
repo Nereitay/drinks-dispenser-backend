@@ -9,12 +9,13 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface CoinsDAOMapper {
     @Mapping(target = "denomination", source = "coinType.denomination")
+    @Mapping(target = "value", source = "coinType.value")
     CoinsDAO toCoinsDAO(Coins coins);
 
     @Mapping(target = "coinType", source = "denomination")
     Coins toCoins(CoinsDAO coinsDAO);
 
-    default CoinType map(Double denomination) {
+    default CoinType map(String denomination) {
         for (CoinType value : CoinType.values()) {
             if (denomination.equals(value.getDenomination())) {
                 return value;

@@ -20,3 +20,6 @@ springdoc:
     enabled: true
   swagger-ui:
     path: /api
+logging:
+  level:
+    org.springframework.r2dbc: debug

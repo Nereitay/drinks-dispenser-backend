@@ -6,6 +6,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface CoinsDAORepository extends R2dbcRepository<CoinsDAO, Long> {
-    Mono<CoinsDAO> findByMachineIdAndDenomination(Long machineId, Double denomination);
+
+    Mono<CoinsDAO> findByMachineIdAndDenomination(Long machineId, String denomination);
     Flux<CoinsDAO> findByMachineId(Long machineId);
 }

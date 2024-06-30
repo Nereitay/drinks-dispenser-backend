@@ -1,6 +1,6 @@
 package es.kiwi.drinksdispenser.application.usecase;
 
-import es.kiwi.drinksdispenser.application.command.DispenseDrinkCommand;
+import es.kiwi.drinksdispenser.application.dto.DispenseDrinkDTO;
 import es.kiwi.drinksdispenser.application.service.DispenseDrinkService;
 import es.kiwi.drinksdispenser.application.vo.DispenseDrinkVO;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 public class DispenseDrinkUseCase {
     private final DispenseDrinkService dispenseDrinkService;
 
-    public Mono<DispenseDrinkVO> execute(DispenseDrinkCommand command) {
+    public Mono<DispenseDrinkVO> execute(DispenseDrinkDTO command) {
         return dispenseDrinkService.dispenseDrink(command);
     }
 }

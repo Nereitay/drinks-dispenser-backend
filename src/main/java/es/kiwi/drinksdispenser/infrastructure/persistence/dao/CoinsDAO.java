@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,7 +23,9 @@ public class CoinsDAO implements Serializable {
 
     private Long machineId;
 
-    private Double denomination;
+    private String denomination;
+
+    private BigDecimal value;
 
     private Integer quantity;
 

@@ -1,6 +1,6 @@
 package es.kiwi.drinksdispenser.infrastructure.api.rest.v1;
 
-import es.kiwi.drinksdispenser.application.command.DispenseDrinkCommand;
+import es.kiwi.drinksdispenser.application.dto.DispenseDrinkDTO;
 import es.kiwi.drinksdispenser.application.usecase.DispenseDrinkUseCase;
 import es.kiwi.drinksdispenser.application.vo.DispenseDrinkVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +22,7 @@ public class DispenseDrinkAdapter {
     @PostMapping
     @Tag(name = "/dispense-drink")
     @Operation(summary = "This method is used to dispense drink.")
-    public Mono<DispenseDrinkVO> dispenseDrink(@RequestBody DispenseDrinkCommand dispenseDrinkCommand) {
-        return dispenseDrinkUseCase.execute(dispenseDrinkCommand);
+    public Mono<DispenseDrinkVO> dispenseDrink(@RequestBody DispenseDrinkDTO dispenseDrinkDTO) {
+        return dispenseDrinkUseCase.execute(dispenseDrinkDTO);
     }
 }
