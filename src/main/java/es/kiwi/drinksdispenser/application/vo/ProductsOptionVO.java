@@ -1,5 +1,6 @@
-package es.kiwi.drinksdispenser.domain.model;
+package es.kiwi.drinksdispenser.application.vo;
 
+import es.kiwi.drinksdispenser.domain.model.ProductsOption;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Products {
-    private Long id;
+public class ProductsOptionVO {
 
     private ProductsOption productsOption;
 
     private Double price;
+
 }

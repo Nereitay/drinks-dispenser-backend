@@ -13,6 +13,6 @@ public enum CoinType {
     ONE_EURO(1.00),
     TWO_EURO(2.00);
 
-    private final double value;
+    private final double denomination;
 
 }

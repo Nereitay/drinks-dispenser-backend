@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,6 +42,19 @@ public class MachineProductsPersistenceAdapter implements MachineProductsOutput 
                 .flatMapMany(productsDAO -> machineProductsDAORepository.findByMachineIdAndProductId(machineId,
                         productsDAO.getId()))
                 .flatMap(machineProductsDAO -> Mono.just(machineProductsDAOMapper.toMachineProducts(machineProductsDAO)));
+    }
+
+    @Override
+    public Mono<MachineProducts> findAvailableProduct(Long machineId, String productName) {
+        return findByMachineIdAndProduct(machineId, productName)
+                .filter(machineProducts -> machineProducts.getExpirationDate().isAfter(LocalDate.now()))
+                .sort(Comparator.comparing(MachineProducts::getExpirationDate))
+                .next();
+    }
+
+    @Override
+    public Mono<Void> reduceProduct(MachineProducts machineProducts) {
+        return machinesDAORepository.reduceStock(machineProducts.getId());
     }
 
     private Mono<MachineProductsDAO> processMachineProduct(MachineProducts machineProducts) {

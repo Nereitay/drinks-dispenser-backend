@@ -35,13 +35,11 @@ CREATE TABLE coins
 (
     id           BIGINT AUTO_INCREMENT PRIMARY KEY,
     machine_id   BIGINT       NOT NULL,
-    denomination VARCHAR(50)  NOT NULL,
-    value        DOUBLE       NOT NULL,
+    denomination DOUBLE  NOT NULL,
     quantity     INT          NOT NULL,
-    operator     VARCHAR(255) DEFAULT 'USER001',
     updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 alter table coins
-    add unique index unique_machine_value (machine_id, value);
+    add unique index unique_machine_value (machine_id, denomination);
 
 

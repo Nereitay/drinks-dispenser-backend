@@ -10,4 +10,8 @@ public interface MachineProductsOutput {
 
     Mono<Void> save(List<MachineProducts> machineProductsList);
     Flux<MachineProducts> findByMachineIdAndProduct(Long machineId, String productName);
+
+    Mono<MachineProducts> findAvailableProduct(Long machineId, String productName);
+
+    Mono<Void> reduceProduct(MachineProducts machineProducts);
 }

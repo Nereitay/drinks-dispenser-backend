@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class Coins {
     private Long id;
 
-    private Machines machine;
+    private Long machineId;
 
     private CoinType coinType;
 

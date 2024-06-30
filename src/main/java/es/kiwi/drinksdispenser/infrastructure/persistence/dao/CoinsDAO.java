@@ -22,13 +22,9 @@ public class CoinsDAO implements Serializable {
 
     private Long machineId;
 
-    private String denomination;
-
-    private Double value;
+    private Double denomination;
 
     private Integer quantity;
-
-    private String operator;
 
     private LocalDateTime updatedAt;
 

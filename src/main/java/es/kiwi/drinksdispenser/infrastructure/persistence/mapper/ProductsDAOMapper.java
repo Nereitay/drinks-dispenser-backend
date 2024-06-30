@@ -11,7 +11,6 @@ public interface ProductsDAOMapper {
 
 
     @Mapping(target = "name", source = "productsOption.name")
-    @Mapping(target = "price", source = "productsOption.price")
     ProductsDAO productsToProductsDAO(Products products);
     @Mapping(target = "productsOption", source = "name")
     Products productsDAOToProducts(ProductsDAO productsDAO);
