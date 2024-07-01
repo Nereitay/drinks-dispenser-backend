@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Table(name = "products")
@@ -21,7 +22,7 @@ public class ProductsDAO implements Serializable {
 
     private String name;
 
-    private Double price;
+    private BigDecimal price;
 
     private String type;
 

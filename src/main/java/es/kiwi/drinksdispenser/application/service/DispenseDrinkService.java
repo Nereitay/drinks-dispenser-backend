@@ -59,7 +59,7 @@ public class DispenseDrinkService {
     }
 
     private Mono<DispenseDrinkVO> isConfirmedByUser(DispenseDrinkDTO command, List<Coins> coinsList) {
-        if (!command.isConfirmed()) {
+        if (Boolean.FALSE.equals(command.isConfirmed())) {
             return handleReturnCoins(
                     coinsList, new RuntimeException("Operation rejected by user"));
         }

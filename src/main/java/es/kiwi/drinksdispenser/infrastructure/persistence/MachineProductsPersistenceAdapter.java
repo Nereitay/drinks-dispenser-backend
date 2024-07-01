@@ -63,7 +63,7 @@ public class MachineProductsPersistenceAdapter implements MachineProductsOutput 
 
     @Override
     public Mono<Void> reduceProduct(MachineProducts machineProducts) {
-        return machinesDAORepository.reduceStock(machineProducts.getId());
+        return machineProductsDAORepository.reduceStock(machineProducts.getId());
     }
 
     private Mono<MachineProductsDAO> processMachineProduct(MachineProducts machineProducts) {
