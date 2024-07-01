@@ -8,11 +8,12 @@ import es.kiwi.drinksdispenser.domain.model.MachineProducts;
 import es.kiwi.drinksdispenser.domain.output.CoinsOutput;
 import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
 import es.kiwi.drinksdispenser.domain.service.CoinsValidationService;
-import es.kiwi.drinksdispenser.integration.event.ProductStockZeroEvent;
-import es.kiwi.drinksdispenser.integration.event.ProductStockZeroEventHandler;
-import es.kiwi.drinksdispenser.integration.lcd.LcdNotifier;
+import es.kiwi.drinksdispenser.integration.event.manager.ProductStockZeroEvent;
+import es.kiwi.drinksdispenser.integration.event.manager.ProductStockZeroEventHandler;
+import es.kiwi.drinksdispenser.integration.event.lcd.LcdNotifier;
 import io.netty.handler.timeout.TimeoutException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -30,6 +31,7 @@ public class DispenseDrinkService {
     private final ProductStockZeroEventHandler productStockZeroEventHandler;
     private final CoinsVOMapper coinsVOMapper;
 
+    @Transactional
     public Mono<DispenseDrinkVO> dispenseDrink(DispenseDrinkDTO command) {
 
         List<Coins> coinsList = command.getCoinTypeList().stream().collect(Collectors.groupingBy(coinType -> coinType,
@@ -73,8 +75,7 @@ public class DispenseDrinkService {
         }
         BigDecimal total = coinsValidationService.calculateTotal(coins);
         return coinsOutput.reduceCoins(coins)
-                .then(Mono.just(new DispenseDrinkVO(e != null ?
-                        e.getMessage().concat(", Operation Cancelled with return coins.") : "",
+                .then(Mono.just(new DispenseDrinkVO(e.getMessage().concat(", Operation Cancelled with return coins."),
                         coinsVOMapper.toCoinsVOList(coins),
                         total, null)));
     }
@@ -95,19 +96,19 @@ public class DispenseDrinkService {
                     BigDecimal change = totalMoney.subtract(price);
                     return coinsValidationService.isSufficientAmount(totalMoney, price)
                             .flatMap(isSufficient -> {
-                                if (!isSufficient) {
+                                if (Boolean.FALSE.equals(isSufficient)) {
                                     return Mono.error(new RuntimeException("Insufficient Amount"));
                                 }
                                 return coinsValidationService.hasEnoughFundsToChange(command.getMachineId(),
                                                 change)
                                         .flatMap(hasEnoughFunds -> {
-                                            if (!hasEnoughFunds) {
+                                            if (Boolean.FALSE.equals(hasEnoughFunds)) {
                                                 return Mono.error(new RuntimeException("Insufficient Funds"));
                                             }
 
                                             return coinsValidationService.canProvideChange(command.getMachineId(), change)
                                                     .flatMap(canProvideChange -> {
-                                                        if (!canProvideChange) {
+                                                        if (Boolean.FALSE.equals(canProvideChange)) {
                                                             return Mono.error(new RuntimeException("Can't provide " +
                                                                     "changes"));
                                                         }

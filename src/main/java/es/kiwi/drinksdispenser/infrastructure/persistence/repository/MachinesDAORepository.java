@@ -9,6 +9,6 @@ import reactor.core.publisher.Mono;
 public interface MachinesDAORepository extends R2dbcRepository<MachinesDAO, Long> {
 
     @Modifying
-    @Query("update machine_products set stock = stock - 1 where id = :id")
+    @Query("update machine_products set stock = stock - 1, updated_at = now()  where id = :id")
     Mono<Void> reduceStock(Long id);
 }

@@ -1,4 +1,4 @@
-package es.kiwi.drinksdispenser.integration.event;
+package es.kiwi.drinksdispenser.integration.event.manager;
 
 import es.kiwi.drinksdispenser.domain.model.Machines;
 import es.kiwi.drinksdispenser.domain.model.Products;

@@ -1,7 +1,5 @@
 package es.kiwi.drinksdispenser.application.vo;
 
-import es.kiwi.drinksdispenser.domain.model.CoinType;
-import es.kiwi.drinksdispenser.domain.model.Coins;
 import es.kiwi.drinksdispenser.domain.model.ProductsOption;
 import lombok.AllArgsConstructor;
 import lombok.Data;

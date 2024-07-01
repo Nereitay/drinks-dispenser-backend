@@ -5,7 +5,6 @@ import es.kiwi.drinksdispenser.domain.model.Machines;
 import es.kiwi.drinksdispenser.infrastructure.persistence.dao.MachinesDAO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 @Mapper
 public interface MachineDAOMapper {

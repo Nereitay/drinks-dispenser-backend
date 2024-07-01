@@ -5,7 +5,6 @@ import es.kiwi.drinksdispenser.domain.model.Coins;
 import es.kiwi.drinksdispenser.domain.output.CoinsOutput;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -13,7 +12,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,12 +33,6 @@ public class CoinsValidationService {
         return coinsOutput.consultTotalMoneyInMachine(machineId).map(totalMoney -> totalMoney.compareTo(change) >= 0);
     }
 
-    public Mono<Void> addReceivedCoins(List<Coins> coins) {
-        return Flux.fromIterable(coins)
-                .flatMap(coin -> coinsOutput.insertCoins(coins))
-                .then();
-    }
-
     public Mono<List<Coins>> reduceChange(Long machineId, BigDecimal change) {
         return coinsOutput.findByMachineId(machineId)
                 .collectList()
@@ -55,19 +47,14 @@ public class CoinsValidationService {
                         int availableCoins = coin.getQuantity();
 
                         int neededCoins = remainingChange.divide(denomination, 0, RoundingMode.DOWN).intValue();
-                        BigDecimal neededAmount = denomination.multiply(BigDecimal.valueOf(neededCoins));
-                        if (neededCoins <= availableCoins) {
-                            coin.setQuantity(availableCoins - neededCoins);
-                            remainingChange = remainingChange.subtract(neededAmount);
+                        int usedCoins = Math.min(neededCoins, availableCoins);
 
-                        } else {
-                            coin.setQuantity(0);
-                            remainingChange = remainingChange.subtract(neededAmount);
-
-                        }
-                        if (neededCoins > 0 || coin.getQuantity() != availableCoins) {
-                            changeCoins.add(createChangeCoin(coin.getCoinType(), neededCoins));
+                        if (usedCoins > 0) {
+                            coin.setQuantity(availableCoins - usedCoins);
+                            remainingChange = remainingChange.subtract(denomination.multiply(BigDecimal.valueOf(usedCoins)));
+                            changeCoins.add(createChangeCoin(coin.getCoinType(), usedCoins));
                             updatedCoins.add(coin);
+
                         }
 
                         if (remainingChange.compareTo(BigDecimal.ZERO) == 0) {
@@ -104,18 +91,17 @@ public class CoinsValidationService {
                         BigDecimal denomination = coin.getCoinType().getValue();
                         int availableCoins = coin.getQuantity();
                         int neededCoins = remainingChange.divide(denomination, 0, RoundingMode.DOWN).intValue();
-                        BigDecimal neededAmount = denomination.multiply(BigDecimal.valueOf(availableCoins));
-                        if (neededCoins <= availableCoins) {
-                            remainingChange = remainingChange.subtract(denomination.multiply(BigDecimal.valueOf(neededCoins)));
-                        } else {
-                            remainingChange = remainingChange.subtract(denomination.multiply(BigDecimal.valueOf(availableCoins)));
+                        int usedCoins = Math.min(neededCoins, availableCoins);
+
+                        if (usedCoins > 0) {
+                            remainingChange = remainingChange.subtract(denomination.multiply(BigDecimal.valueOf(usedCoins)));
                         }
 
                         if (remainingChange.compareTo(BigDecimal.ZERO) == 0) {
                             return true;
                         }
                     }
-                    return false;
+                    return remainingChange.compareTo(BigDecimal.ZERO) == 0;
                 });
     }
 }

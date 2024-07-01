@@ -14,7 +14,7 @@ public class ProductStockService {
 
     public Mono<ProductStockVO> consultProductStock(Long machineId, String productName) {
         return machineProductsOutput.findByMachineIdAndProduct(machineId, productName)
-                .filter(machineProducts -> machineProducts.getExpirationDate().isAfter(LocalDate.now()))
+                .filter(machineProducts -> machineProducts.getExpirationDate().isAfter(LocalDate.now()) && machineProducts.getStock() > 0)
                 .reduce(0, (totalStock, machineProducts) -> totalStock + machineProducts.getStock())
                 .flatMap(totalStock -> Mono.just(new ProductStockVO(machineId, productName, totalStock)));
     }

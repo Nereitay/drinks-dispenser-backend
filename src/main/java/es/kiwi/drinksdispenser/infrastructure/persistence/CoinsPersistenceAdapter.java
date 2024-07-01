@@ -37,8 +37,9 @@ public class CoinsPersistenceAdapter implements CoinsOutput {
 
     @Override
     public Mono<BigDecimal> consultTotalMoneyInMachine(Long machineId) {
-        return coinsDAORepository.findByMachineId(machineId).reduce(BigDecimal.ZERO,
-                (aDouble, coinsDAO) -> aDouble.add(coinsDAO.getValue().multiply(BigDecimal.valueOf(coinsDAO.getQuantity()))));
+        return coinsDAORepository.findByMachineId(machineId)
+                .map(coinsDAO -> coinsDAO.getValue().multiply(BigDecimal.valueOf(coinsDAO.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override

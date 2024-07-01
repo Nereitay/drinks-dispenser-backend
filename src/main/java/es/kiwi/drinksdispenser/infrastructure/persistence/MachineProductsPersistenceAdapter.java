@@ -5,6 +5,7 @@ import es.kiwi.drinksdispenser.domain.exception.ProductNotFoundException;
 import es.kiwi.drinksdispenser.domain.model.MachineProducts;
 import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
 import es.kiwi.drinksdispenser.infrastructure.persistence.dao.MachineProductsDAO;
+import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.MachineProductsDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.mapper.ProductsDAOMapper;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachineProductsDAORepository;
@@ -26,6 +27,7 @@ public class MachineProductsPersistenceAdapter implements MachineProductsOutput 
     private final ProductsDAORepository productsDAORepository;
     private final MachinesDAORepository machinesDAORepository;
     private final ProductsDAOMapper productsDAOMapper;
+    private final MachineDAOMapper machineDAOMapper;
 
 
     @Override
@@ -37,17 +39,18 @@ public class MachineProductsPersistenceAdapter implements MachineProductsOutput 
     public Flux<MachineProducts> findByMachineIdAndProduct(Long machineId, String productName) {
         return machinesDAORepository.findById(machineId)
                 .switchIfEmpty(Mono.error(new MachineNotFoundException("Machine with ID " + machineId + " not found.")))
-                .flatMap(machineDAO ->
-                        productsDAORepository.findByName(productName))
-                .switchIfEmpty(Mono.error(new ProductNotFoundException("Product with name '" + productName + "' not " +
-                        "found.")))
-                .flatMapMany(productsDAO -> machineProductsDAORepository.findByMachineIdAndProductId(machineId,
-                                productsDAO.getId())
-                        .flatMap(machineProductsDAO -> {
-                            MachineProducts machineProducts = machineProductsDAOMapper.toMachineProducts(machineProductsDAO);
-                            machineProducts.setProduct(productsDAOMapper.productsDAOToProducts(productsDAO));
-                            return Mono.just(machineProducts);
-                        }));
+                .flatMapMany(machineDAO ->
+                        productsDAORepository.findByName(productName)
+                                .switchIfEmpty(Mono.error(new ProductNotFoundException("Product with name '" + productName + "' not found.")))
+                                .flatMapMany(productsDAO -> machineProductsDAORepository.findByMachineIdAndProductId(machineId, productsDAO.getId())
+                                        .map(machineProductsDAO -> {
+                                            MachineProducts machineProducts = machineProductsDAOMapper.toMachineProducts(machineProductsDAO);
+                                            machineProducts.setProduct(productsDAOMapper.productsDAOToProducts(productsDAO));
+                                            machineProducts.setMachine(machineDAOMapper.machinesDAOToMachines(machineDAO));
+                                            return machineProducts;
+                                        })
+                                )
+                );
     }
 
     @Override

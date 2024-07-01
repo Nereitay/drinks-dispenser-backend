@@ -18,8 +18,8 @@ import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachineProd
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.MachinesDAORepository;
 import es.kiwi.drinksdispenser.infrastructure.persistence.MachinesPersistenceAdapter;
 import es.kiwi.drinksdispenser.infrastructure.persistence.repository.ProductsDAORepository;
-import es.kiwi.drinksdispenser.integration.event.ProductStockZeroEventHandler;
-import es.kiwi.drinksdispenser.integration.lcd.LcdNotifier;
+import es.kiwi.drinksdispenser.integration.event.manager.ProductStockZeroEventHandler;
+import es.kiwi.drinksdispenser.integration.event.lcd.LcdNotifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,9 +38,10 @@ public class BeanConfiguration {
                                                                                MachineProductsDAOMapper machineProductsDAOMapper,
                                                                                ProductsDAORepository productsDAORepository,
                                                                                MachinesDAORepository machinesDAORepository,
-                                                                               ProductsDAOMapper productsDAOMapper) {
+                                                                               ProductsDAOMapper productsDAOMapper,
+                                                                               MachineDAOMapper machineDAOMapper) {
         return new MachineProductsPersistenceAdapter(machineProductsDAORepository, machineProductsDAOMapper,
-                productsDAORepository, machinesDAORepository, productsDAOMapper);
+                productsDAORepository, machinesDAORepository, productsDAOMapper, machineDAOMapper);
     }
 
     @Bean

@@ -15,6 +15,47 @@ spring:
       ddl-auto: update
     generate-ddl: false
     open-in-view: false
+  cloud:
+    stream:
+      bindings:
+        lcdNotifierChannel-out-0:
+          destination: lcd-notifier-topic
+          contentType: text/plain
+        lcdNotifierChannel-in-0:
+          destination: lcd-notifier-topic
+        zeroStockNotifierChannel-out-0:
+          destination: needs-manager-notifier-topic
+          content-type: application/json
+        zeroStockNotifierChannel-in-0:
+          destination: needs-manager-notifier-topic
+        zeroStockNotifierChannelProduct4-in-0:
+          destination: needs-manager-notifier-topic
+        zeroStockNotifierChannelMachine1-in-0:
+          destination: needs-manager-notifier-topic
+      rabbit:
+        bindings:
+          zeroStockNotifierChannel-out-0:
+            producer:
+              routing-key-expression: "'machine.' + headers['machineId'] + '.product.' + headers['productId']"
+              exchange-type: topic
+          zeroStockNotifierChannelProduct4-in-0:
+            consumer:
+              exchange-type: topic
+              binding-routing-key: machine.*.product.4
+          zeroStockNotifierChannelMachine1-in-0:
+            consumer:
+              exchange-type: topic
+              binding-routing-key: machine.1.#
+
+    function:
+      definition: lcdNotifierChannel;zeroStockNotifierChannel;zeroStockNotifierChannelProduct4;zeroStockNotifierChannelMachine1
+  rabbitmq:
+    host: localhost
+    port: 5672
+    stream:
+      username: guest
+      password: guest
+    virtual-host: /dispenser
 springdoc:
   api-docs:
     enabled: true
@@ -23,3 +64,4 @@ springdoc:
 logging:
   level:
     org.springframework.r2dbc: debug
+    org.springframework.cloud.stream: debug
