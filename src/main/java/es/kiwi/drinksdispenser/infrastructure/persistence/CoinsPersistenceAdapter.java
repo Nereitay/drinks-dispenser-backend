@@ -32,7 +32,11 @@ public class CoinsPersistenceAdapter implements CoinsOutput {
 
     @Override
     public Mono<Void> saveAll(List<Coins> updatedCoins) {
-        return Flux.fromIterable(updatedCoins).map(coinsDAOMapper::toCoinsDAO).flatMap(coinsDAORepository::save).then();
+        return Flux.fromIterable(updatedCoins).map(coins -> {
+            CoinsDAO coinsDAO = coinsDAOMapper.toCoinsDAO(coins);
+            coinsDAO.setUpdatedAt(LocalDateTime.now());
+            return coinsDAO;
+        }).flatMap(coinsDAORepository::save).then();
     }
 
     @Override

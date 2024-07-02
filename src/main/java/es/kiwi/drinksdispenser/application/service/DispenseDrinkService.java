@@ -73,9 +73,9 @@ public class DispenseDrinkService {
 
     private Mono<DispenseDrinkVO> handleReturnCoins(List<Coins> coins, Throwable e) {
         if (e instanceof TimeoutException) {
-            lcdNotifier.notify(OPERATION_TIMED_OUT);
+            notifyLcd(OPERATION_TIMED_OUT);
         } else {
-            lcdNotifier.notify(OPERATION_FAILED_ERROR + e.getMessage());
+            notifyLcd(OPERATION_FAILED_ERROR + e.getMessage());
         }
         BigDecimal total = coinsValidationService.calculateTotal(coins);
         return coinsOutput.reduceCoins(coins)
@@ -85,14 +85,14 @@ public class DispenseDrinkService {
     }
 
     private Mono<MachineProducts> checkProductAvailability(DispenseDrinkDTO command) {
-        lcdNotifier.notify(CHECK_PRODUCT_AVAILABILITY);
+        notifyLcd(CHECK_PRODUCT_AVAILABILITY);
         return machineProductsOutput.findAvailableProduct(command.getMachineId(), command.getProductsOption().getName())
                 .switchIfEmpty(Mono.error(new DispenseDrinkException(PRODUCT_NO_STOCK_OR_EXPIRED)));
     }
 
     private Mono<MachineProducts> validateMoney(DispenseDrinkDTO command, List<Coins> coins,
                                                 MachineProducts machineProducts) {
-        lcdNotifier.notify(VALIDATE_MONEY);
+        notifyLcd(VALIDATE_MONEY);
         return Mono.just(machineProducts)
                 .flatMap(product -> {
                     BigDecimal totalMoney = coinsValidationService.calculateTotal(coins);
@@ -124,7 +124,7 @@ public class DispenseDrinkService {
     }
 
     private Mono<DispenseDrinkVO> dispenseProduct(DispenseDrinkDTO command, List<Coins> coins, MachineProducts machineProducts) {
-        lcdNotifier.notify(DISPENSE_PRODUCT);
+        notifyLcd(DISPENSE_PRODUCT);
         BigDecimal totalCoinsValue = coinsValidationService.calculateTotal(coins);
         BigDecimal productPrice = machineProducts.getProduct().getPrice();
         BigDecimal changeAmount = totalCoinsValue.subtract(productPrice);
@@ -146,6 +146,14 @@ public class DispenseDrinkService {
 
     private Mono<MachineProducts> notifyOutOfStock(MachineProducts machineProducts) {
         return Mono.fromRunnable(() -> productStockZeroEventHandler.handle(new ProductStockZeroEvent(machineProducts.getMachine(),
-                machineProducts.getProduct())));
+                        machineProducts.getProduct())))
+                .thenReturn(machineProducts)
+                .onErrorResume(e -> Mono.just(machineProducts));
+    }
+
+    private void notifyLcd(String message) {
+        Mono.fromRunnable(() -> lcdNotifier.notify(message))
+                .onErrorResume(e -> Mono.empty())
+                .subscribe();
     }
 }
