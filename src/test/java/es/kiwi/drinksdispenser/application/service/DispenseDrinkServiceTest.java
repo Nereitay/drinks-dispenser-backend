@@ -7,6 +7,7 @@ import es.kiwi.drinksdispenser.domain.model.*;
 import es.kiwi.drinksdispenser.domain.output.CoinsOutput;
 import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
 import es.kiwi.drinksdispenser.domain.service.CoinsValidationService;
+import es.kiwi.drinksdispenser.integration.event.lcd.LcdNotifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,6 +28,9 @@ class DispenseDrinkServiceTest {
 
     @Mock
     private CoinsOutput coinsOutput;
+
+    @Mock
+    private LcdNotifier lcdNotifier;
 
     @Mock
     private CoinsValidationService coinsValidationService;

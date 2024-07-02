@@ -50,7 +50,7 @@ spring:
     function:
       definition: lcdNotifierChannel;zeroStockNotifierChannel;zeroStockNotifierChannelProduct4;zeroStockNotifierChannelMachine1
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
     stream:
       username: guest
