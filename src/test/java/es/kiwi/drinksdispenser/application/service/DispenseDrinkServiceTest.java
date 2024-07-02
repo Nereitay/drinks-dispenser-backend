@@ -7,8 +7,6 @@ import es.kiwi.drinksdispenser.domain.model.*;
 import es.kiwi.drinksdispenser.domain.output.CoinsOutput;
 import es.kiwi.drinksdispenser.domain.output.MachineProductsOutput;
 import es.kiwi.drinksdispenser.domain.service.CoinsValidationService;
-import es.kiwi.drinksdispenser.integration.event.lcd.LcdNotifier;
-import es.kiwi.drinksdispenser.integration.event.manager.ProductStockZeroEventHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,16 +29,10 @@ class DispenseDrinkServiceTest {
     private CoinsOutput coinsOutput;
 
     @Mock
-    private LcdNotifier lcdNotifier;
-
-    @Mock
     private CoinsValidationService coinsValidationService;
 
     @Mock
     private MachineProductsOutput machineProductsOutput;
-
-    @Mock
-    private ProductStockZeroEventHandler productStockZeroEventHandler;
 
     @Mock
     private CoinsVOMapper coinsVOMapper;
@@ -92,7 +84,7 @@ class DispenseDrinkServiceTest {
         when(coinsVOMapper.toCoinsVOList(any())).thenReturn(coinsList.stream().map(coins -> new CoinsVO(coins.getCoinType(), coins.getQuantity())).collect(Collectors.toList()));
 
         StepVerifier.create(dispenseDrinkService.dispenseDrink(command))
-                .expectNextMatches(vo -> vo.getMessage().contains("Insufficient Amount"))
+                .expectNextMatches(vo -> vo.getMessage().contains("Insufficient coins Amount"))
                 .verifyComplete();
     }
 

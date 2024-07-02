@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/v1/dispense-drink")
 @RequiredArgsConstructor
-public class DispenseDrinkAdapter {
+public class DispenseDrinkRestAdapter {
 
     private final DispenseDrinkUseCase dispenseDrinkUseCase;
 
